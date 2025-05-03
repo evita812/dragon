@@ -1,8 +1,7 @@
 import streamlit as st
-import base64
 
-# Jungle background (a green pattern)
-def set_background():
+# Set jungle background
+def set_jungle_background():
     jungle_url = "https://images.unsplash.com/photo-1615361205439-684e308ea3dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80"
     st.markdown(
         f"""
@@ -10,24 +9,34 @@ def set_background():
         .stApp {{
             background-image: url("{jungle_url}");
             background-size: cover;
-            background-repeat: no-repeat;
             background-attachment: fixed;
+            background-position: center;
+            color: white;
+        }}
+        .emoji-button > button {{
+            font-size: 50px !important;
+            height: 80px !important;
+            width: 80px !important;
+        }}
+        .big-dragon {{
+            font-size: 100px;
+            text-align: center;
         }}
         </style>
         """,
         unsafe_allow_html=True
     )
 
-set_background()
+set_jungle_background()
 
-# Session state
+# --- Session state ---
 if "xp" not in st.session_state:
     st.session_state.xp = 0
 if "dragons_raised" not in st.session_state:
     st.session_state.dragons_raised = 0
 
-# Dragon stage emoji
-def get_dragon_stage(xp):
+# --- Get current dragon stage ---
+def get_dragon_emoji(xp):
     if xp < 3:
         return "🥚"
     elif xp < 7:
@@ -39,40 +48,23 @@ def get_dragon_stage(xp):
     else:
         return "🌈"
 
-# Header
-st.markdown("<h1 style='text-align: center; color: white;'>🐲 Dragon Jungle</h1>", unsafe_allow_html=True)
+# --- Show dragon ---
+st.markdown("<div class='big-dragon'>" + get_dragon_emoji(st.session_state.xp) + "</div>", unsafe_allow_html=True)
+st.markdown(f"<h2 style='text-align:center;'>XP: {st.session_state.xp} / 25</h2>", unsafe_allow_html=True)
+st.markdown(f"<h4 style='text-align:center;'>Dragons Raised: {st.session_state.dragons_raised}</h4>", unsafe_allow_html=True)
 
-st.markdown(
-    f"<h2 style='text-align: center; color: white;'>Dragon: {get_dragon_stage(st.session_state.xp)}</h2>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    f"<h3 style='text-align: center; color: white;'>XP: {st.session_state.xp} / 25</h3>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    f"<h4 style='text-align: center; color: white;'>🌟 Dragons Raised: {st.session_state.dragons_raised}</h4>",
-    unsafe_allow_html=True,
-)
+# --- Emoji task buttons (big) ---
+st.markdown("<h2>Tap a button:</h2>", unsafe_allow_html=True)
+task_emojis = ["🛏", "🍽", "🧸", "🪥", "🚿", "🎒", "🎮", "🎤"]
+cols = st.columns(4)
 
-# Task buttons
-st.markdown("<h2 style='color: white;'>👶 Tap When You Finish:</h2>", unsafe_allow_html=True)
-cols = st.columns(3)
-tasks = {
-    "🛏 Make Bed": "bed",
-    "🍽 Eat": "eat",
-    "🧸 Clean Toys": "toys",
-    "🪥 Brush Teeth": "teeth",
-    "🚿 Shower": "shower",
-    "🎒 Pack Bag": "bag",
-}
+for i, emoji in enumerate(task_emojis):
+    with cols[i % 4]:
+        if st.button(emoji, key=f"task_{i}"):
+            st.session_state.xp += 1
 
-for i, (label, key) in enumerate(tasks.items()):
-    if cols[i % 3].button(label):
-        st.session_state.xp += 1
-
-        if st.session_state.xp >= 25:
-            st.balloons()
-            st.success("🎉 Your dragon grew up and went into the wild!")
-            st.session_state.dragons_raised += 1
-            st.session_state.xp = 0
+            if st.session_state.xp >= 25:
+                st.balloons()
+                st.success("🎉 Your dragon grew up and went into the wild!")
+                st.session_state.dragons_raised += 1
+                st.session_state.xp = 0
