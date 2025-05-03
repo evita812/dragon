@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 # Set jungle background
 def set_jungle_background():
@@ -34,6 +35,8 @@ if "xp" not in st.session_state:
     st.session_state.xp = 0
 if "dragons_raised" not in st.session_state:
     st.session_state.dragons_raised = 0
+if "tasks_completed" not in st.session_state:
+    st.session_state.tasks_completed = 0
 
 # --- Get current dragon stage ---
 def get_dragon_emoji(xp):
@@ -53,18 +56,40 @@ st.markdown("<div class='big-dragon'>" + get_dragon_emoji(st.session_state.xp) +
 st.markdown(f"<h2 style='text-align:center;'>XP: {st.session_state.xp} / 25</h2>", unsafe_allow_html=True)
 st.markdown(f"<h4 style='text-align:center;'>Dragons Raised: {st.session_state.dragons_raised}</h4>", unsafe_allow_html=True)
 
-# --- Emoji task buttons (big) ---
-st.markdown("<h2>Tap a button:</h2>", unsafe_allow_html=True)
-task_emojis = ["🛏", "🍽", "🧸", "🪥", "🚿", "🎒", "🎮", "🎤"]
-cols = st.columns(4)
+# --- Fun and interactive task buttons ---
+st.markdown("<h2>Complete these tasks to grow your dragon!</h2>", unsafe_allow_html=True)
 
-for i, emoji in enumerate(task_emojis):
-    with cols[i % 4]:
-        if st.button(emoji, key=f"task_{i}"):
-            st.session_state.xp += 1
+task_list = ["🛏 Make Bed", "🍽 Eat", "🧸 Clean Toys", "🪥 Brush Teeth", "🚿 Shower", "🎒 Pack Bag", "🎮 Play", "🎤 Sing"]
 
-            if st.session_state.xp >= 25:
-                st.balloons()
-                st.success("🎉 Your dragon grew up and went into the wild!")
-                st.session_state.dragons_raised += 1
-                st.session_state.xp = 0
+# Select random task from the list
+selected_task = random.choice(task_list)
+
+st.markdown(f"<h3>Today's Task: {selected_task}</h3>", unsafe_allow_html=True)
+
+# --- Task completion ---
+if st.button("Complete Task"):
+    st.session_state.xp += 1
+    st.session_state.tasks_completed += 1
+    st.success(f"Great job! You completed the task: {selected_task}")
+
+    # Show the dragon evolve at certain XP levels
+    if st.session_state.xp == 5:
+        st.balloons()
+        st.markdown("<h3>Your dragon is growing! It's now a baby dragon 🐣!</h3>", unsafe_allow_html=True)
+    elif st.session_state.xp == 10:
+        st.balloons()
+        st.markdown("<h3>Your dragon is now a kid dragon 🐉!</h3>", unsafe_allow_html=True)
+    elif st.session_state.xp == 15:
+        st.balloons()
+        st.markdown("<h3>Your dragon is now a teen dragon 🔥!</h3>", unsafe_allow_html=True)
+    elif st.session_state.xp == 25:
+        st.balloons()
+        st.markdown("<h3>Your dragon is now an adult! 🌈</h3>", unsafe_allow_html=True)
+        st.session_state.dragons_raised += 1
+        st.session_state.xp = 0  # Reset XP after evolving
+
+# --- Task buttons (interactive) ---
+if st.button("Show Dragon's Tasks"):
+    st.write("🛏 Make Bed, 🍽 Eat, 🧸 Clean Toys, 🪥 Brush Teeth, 🚿 Shower, 🎒 Pack Bag, 🎮 Play, 🎤 Sing")
+
+
