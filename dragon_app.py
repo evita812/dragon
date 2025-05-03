@@ -1,9 +1,8 @@
 import streamlit as st
 
-# Set page config
 st.set_page_config(page_title="Dragon Schedule App", layout="centered")
 
-# Session state to keep track of tasks, XP, and dragons raised
+# --- Session state setup ---
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 if "xp" not in st.session_state:
@@ -11,7 +10,7 @@ if "xp" not in st.session_state:
 if "dragons_raised" not in st.session_state:
     st.session_state.dragons_raised = 0
 
-# Get dragon stage as emoji
+# --- Dragon Stage ---
 def get_dragon_stage(xp):
     if xp < 3:
         return "🥚 Egg"
@@ -24,36 +23,44 @@ def get_dragon_stage(xp):
     else:
         return "🌈 Adult Dragon!"
 
-# App title
+# --- Header ---
 st.title("🐲 Your Dragon Schedule")
-
-# Show dragon status
 st.subheader(f"Dragon Stage: {get_dragon_stage(st.session_state.xp)}")
-st.text(f"XP: {st.session_state.xp} / 25")
-st.text(f"Dragons Raised: {st.session_state.dragons_raised}")
+st.write(f"XP: **{st.session_state.xp}** / 25")
+st.write(f"Dragons Raised: **{st.session_state.dragons_raised}**")
 
-# Add new task
-task = st.text_input("➕ Add a new task")
+# --- Add Task ---
+new_task = st.text_input("➕ Add a new task")
 if st.button("Add Task"):
-    if task.strip():
-        st.session_state.tasks.append({"text": task, "done": False})
+    if new_task.strip():
+        st.session_state.tasks.append({"text": new_task, "done": False})
 
-# Task list
+# --- Task List ---
 st.subheader("📋 Your Tasks")
-for i, t in enumerate(st.session_state.tasks):
-    if not t["done"]:
-        if st.button(f"✅ {t['text']}", key=f"task_{i}"):
-            st.session_state.tasks[i]["done"] = True
-            st.session_state.xp += 1
 
-            # Dragon completed!
-            if st.session_state.xp >= 25:
-                st.success("🎉 Your dragon has grown up and returned to the wild!")
-                st.session_state.dragons_raised += 1
-                st.session_state.xp = 0
-                st.session_state.tasks = []
+# Create a list to hold updates
+task_to_mark_done = None
 
-# Clear finished tasks
+for i, task in enumerate(st.session_state.tasks):
+    if not task["done"]:
+        col1, col2 = st.columns([0.8, 0.2])
+        with col1:
+            st.write(task["text"])
+        with col2:
+            if st.button("✅ Done", key=f"done_{i}"):
+                task_to_mark_done = i
+
+# Apply updates after loop
+if task_to_mark_done is not None:
+    st.session_state.tasks[task_to_mark_done]["done"] = True
+    st.session_state.xp += 1
+
+    if st.session_state.xp >= 25:
+        st.success("🎉 Your dragon has grown up and returned to the wild!")
+        st.session_state.dragons_raised += 1
+        st.session_state.xp = 0
+        st.session_state.tasks = []
+
+# --- Clear completed ---
 if st.button("🗑 Clear Completed Tasks"):
     st.session_state.tasks = [t for t in st.session_state.tasks if not t["done"]]
-
