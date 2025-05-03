@@ -1,66 +1,78 @@
 import streamlit as st
+import base64
 
-st.set_page_config(page_title="Dragon Schedule App", layout="centered")
+# Jungle background (a green pattern)
+def set_background():
+    jungle_url = "https://images.unsplash.com/photo-1615361205439-684e308ea3dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80"
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{jungle_url}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-# --- Session state setup ---
-if "tasks" not in st.session_state:
-    st.session_state.tasks = []
+set_background()
+
+# Session state
 if "xp" not in st.session_state:
     st.session_state.xp = 0
 if "dragons_raised" not in st.session_state:
     st.session_state.dragons_raised = 0
 
-# --- Dragon Stage ---
+# Dragon stage emoji
 def get_dragon_stage(xp):
     if xp < 3:
-        return "🥚 Egg"
+        return "🥚"
     elif xp < 7:
-        return "🐣 Baby"
+        return "🐣"
     elif xp < 15:
-        return "🐉 Kid"
+        return "🐉"
     elif xp < 25:
-        return "🔥 Teen"
+        return "🔥"
     else:
-        return "🌈 Adult Dragon!"
+        return "🌈"
 
-# --- Header ---
-st.title("🐲 Your Dragon Schedule")
-st.subheader(f"Dragon Stage: {get_dragon_stage(st.session_state.xp)}")
-st.write(f"XP: **{st.session_state.xp}** / 25")
-st.write(f"Dragons Raised: **{st.session_state.dragons_raised}**")
+# Header
+st.markdown("<h1 style='text-align: center; color: white;'>🐲 Dragon Jungle</h1>", unsafe_allow_html=True)
 
-# --- Add Task ---
-new_task = st.text_input("➕ Add a new task")
-if st.button("Add Task"):
-    if new_task.strip():
-        st.session_state.tasks.append({"text": new_task, "done": False})
+st.markdown(
+    f"<h2 style='text-align: center; color: white;'>Dragon: {get_dragon_stage(st.session_state.xp)}</h2>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    f"<h3 style='text-align: center; color: white;'>XP: {st.session_state.xp} / 25</h3>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    f"<h4 style='text-align: center; color: white;'>🌟 Dragons Raised: {st.session_state.dragons_raised}</h4>",
+    unsafe_allow_html=True,
+)
 
-# --- Task List ---
-st.subheader("📋 Your Tasks")
+# Task buttons
+st.markdown("<h2 style='color: white;'>👶 Tap When You Finish:</h2>", unsafe_allow_html=True)
+cols = st.columns(3)
+tasks = {
+    "🛏 Make Bed": "bed",
+    "🍽 Eat": "eat",
+    "🧸 Clean Toys": "toys",
+    "🪥 Brush Teeth": "teeth",
+    "🚿 Shower": "shower",
+    "🎒 Pack Bag": "bag",
+}
 
-# Create a list to hold updates
-task_to_mark_done = None
+for i, (label, key) in enumerate(tasks.items()):
+    if cols[i % 3].button(label):
+        st.session_state.xp += 1
 
-for i, task in enumerate(st.session_state.tasks):
-    if not task["done"]:
-        col1, col2 = st.columns([0.8, 0.2])
-        with col1:
-            st.write(task["text"])
-        with col2:
-            if st.button("✅ Done", key=f"done_{i}"):
-                task_to_mark_done = i
-
-# Apply updates after loop
-if task_to_mark_done is not None:
-    st.session_state.tasks[task_to_mark_done]["done"] = True
-    st.session_state.xp += 1
-
-    if st.session_state.xp >= 25:
-        st.success("🎉 Your dragon has grown up and returned to the wild!")
-        st.session_state.dragons_raised += 1
-        st.session_state.xp = 0
-        st.session_state.tasks = []
-
-# --- Clear completed ---
-if st.button("🗑 Clear Completed Tasks"):
-    st.session_state.tasks = [t for t in st.session_state.tasks if not t["done"]]
+        if st.session_state.xp >= 25:
+            st.balloons()
+            st.success("🎉 Your dragon grew up and went into the wild!")
+            st.session_state.dragons_raised += 1
+            st.session_state.xp = 0
